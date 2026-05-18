@@ -41,14 +41,14 @@
  
 ## 3. 주차별 일정
  
-### Phase 1: 공동 학습 (1~2주차)
+### Phase 1: 공동 학습
  
 둘 다 함께 진행:
 - AnySoftKeyboard 빌드 및 실행 환경 세팅
 - 코드베이스 전체 구조 파악
 - 안드로이드 IME 동작 원리 학습 (`InputMethodService`, `EditorInfo`, `InputType`)
 - 자동 추천 관련 핵심 파일 위치 공동 파악
-### Phase 2: 본격 분담 (3~7주차)
+### Phase 2: 본격 분담
  
 #### A 담당 (분석/공격)
  
