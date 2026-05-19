@@ -1,4 +1,4 @@
-# Sensitive Input PoC App
+# AnySoftKeyboard Sensitive Input PoC
 
 This Android app is a graduation-project PoC for testing how AnySoftKeyboard handles sensitive input fields.
 
