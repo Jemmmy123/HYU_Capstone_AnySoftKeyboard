@@ -94,3 +94,5 @@ include ':ime:chewbacca'
 include ':ime:permissions'
 
 include ':ime:app'
+
+include ':poc-app'

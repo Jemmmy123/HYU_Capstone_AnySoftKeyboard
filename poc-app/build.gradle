@@ -1,0 +1,13 @@
+apply plugin: 'com.android.application'
+
+apply from: "${rootDir}/gradle/android_general.gradle"
+
+android {
+    namespace 'dev.jemmmy.sensitiveinputpoc'
+
+    defaultConfig {
+        applicationId 'dev.jemmmy.sensitiveinputpoc'
+        versionCode 1
+        versionName '1.0'
+    }
+}
