@@ -7,12 +7,22 @@ This Android app is a graduation-project PoC for testing how AnySoftKeyboard han
 1. Install and enable the original AnySoftKeyboard.
 2. Install this PoC app.
 3. Open the app and use `Pick IME` to select AnySoftKeyboard.
-4. For each test field, manually type the sample value with AnySoftKeyboard.
-5. Move back to `T1 일반 텍스트 baseline` and type the sample prefix.
-6. Record whether the suggestion strip shows the previously entered value.
-7. For clipboard testing, tap `Copy Clipboard Test`, then focus `T2` and `T3` and compare whether the clipboard strip is masked.
+4. Review the `Verified Findings` summary at the top of the screen.
+5. For each main test field, manually type the sample value with AnySoftKeyboard.
+6. Move back to `T1 Baseline normal text` and type the sample prefix.
+7. Record whether the suggestion strip shows the previously entered value.
+8. For clipboard testing, tap `Copy F2 Clipboard`, then focus `T2` and `T3` and compare whether the clipboard strip is masked.
 
 Do not insert test strings with `adb`, app-side autofill, or programmatic text filling. Learning tests are valid only when the text is entered through the IME.
+
+## UI Structure
+
+The main screen keeps the demo focused on F1-F5:
+
+- `Verified Findings`: high-level reproduced result summary
+- `Copy F2 Clipboard`: dedicated clipboard value generator for F2
+- `Main Test Fields`: T1-T10 fields used in the main demo flow
+- `Show Optional Edge Case`: reveals T11 only when the TYPE_NULL edge case is needed
 
 ## Important Cases
 
@@ -28,7 +38,7 @@ Do not insert test strings with `adb`, app-side autofill, or programmatic text f
 | T8 | `TYPE_TEXT_VARIATION_EMAIL_ADDRESS` |
 | T9 | `IME_FLAG_NO_PERSONALIZED_LEARNING` |
 | T10 | Normal text field with `hint="비밀번호"` |
-| T11 | `TYPE_NULL` |
+| T11 | `TYPE_NULL` optional edge case |
 
 ## Reproduced Results
 
