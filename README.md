@@ -1,142 +1,155 @@
-    # 졸업 프로젝트 계획
- 
-> **주제:** 키보드 앱의 자동 추천 기능 보안성 강화
-> **베이스:** AnySoftKeyboard (오픈소스 Android IME, Apache 2.0)
-> **팀:** 2명 (A / B)
+# 졸업 프로젝트 계획
+
+> **주제:** Android 키보드 앱의 민감 입력 보호 정책 분석 및 보안 강화  
+> **베이스:** AnySoftKeyboard (오픈소스 Android IME, Apache 2.0)  
+> **팀:** 2명 (A / B)  
 > **기간:** 약 5개월
- 
+
 ---
- 
+
 ## 1. 프로젝트 개요
- 
+
 ### 배경
-키보드 앱의 자동 추천 기능은 사용 편의성을 위해 제공되지만, ID·패스워드 등 민감 정보가 학습되거나 추천 후보로 노출되어 기밀 유출 경로가 될 수 있다.
- 
+키보드 앱의 자동 추천 기능은 입력 편의성을 높이지만, 입력 필드의 성격을 잘못 판단하면 민감 정보가 추천 후보, 클립보드 strip, 개인화 학습 경로에 노출될 수 있다.
+
+Android IME는 앱이 전달하는 `EditorInfo`, `InputType`, `imeOptions`를 기반으로 입력 필드를 판단한다. 따라서 키보드가 비밀번호, PIN, 개인화 학습 금지, 추천 비활성화 플래그를 일관되게 처리하는지 분석할 필요가 있다.
+
 ### 목표
-1. AnySoftKeyboard의 자동 추천 동작을 분석하여 민감 정보 유출 가능 경로를 식별한다.
-2. 식별된 취약점을 보완하는 보안 강화 기능을 구현한다.
-3. 강화 전/후를 정량적으로 비교 평가한다.
+1. AnySoftKeyboard의 민감 입력 보호 정책을 코드와 PoC 앱으로 분석한다.
+2. `InputType`/`imeOptions` 조합별 추천 표시, 클립보드 표시, 학습 차단 여부를 실험한다.
+3. 보호 정책의 경계 조건을 식별하고, 핵심 문제를 보안 패치로 보완한다.
+4. 원본 버전과 패치 버전을 동일 PoC로 비교 평가한다.
+
 ### 핵심 주제
-**민감 입력 필드에서의 추천/학습 차단 강화**
- 
-- 안드로이드의 `InputType` 플래그(`TYPE_TEXT_VARIATION_PASSWORD` 등)가 키보드에서 충분히 처리되는지 분석
-- 누락된 케이스 및 우회 가능 시나리오 도출
-- 패치 및 휴리스틱 보강을 통해 차단 범위 확장
+**민감 입력 필드에서의 추천 strip, 클립보드 strip, 개인화 학습 정책 검증 및 보강**
+
+- `TYPE_TEXT_VARIATION_PASSWORD`, `TYPE_NUMBER_VARIATION_PASSWORD` 등 민감 입력 타입 처리 분석
+- `TYPE_TEXT_FLAG_NO_SUGGESTIONS`, `IME_FLAG_NO_PERSONALIZED_LEARNING` 등 보안 관련 플래그 처리 분석
+- 숫자 비밀번호/PIN 필드의 클립보드 마스킹 정책 보강
+- PoC 앱을 통한 패치 전/후 비교
+
 ---
- 
+
 ## 2. 역할 분담
- 
-### A: 분석 & 공격 담당
-- 현재 키보드가 막지 못하는 케이스 발굴
-- 결과물: 취약점 진단 보고서 + PoC 데모 앱
+
+### A: 분석 & PoC 담당
+- AnySoftKeyboard의 입력 필드 처리 흐름 분석
+- `InputType`/`imeOptions`별 테스트 케이스 설계
+- PoC Android 앱 제작
+- 원본/패치 버전 비교 실험
+- 결과물: 분석 보고서 + PoC 앱 + 평가 결과
+
 ### B: 방어 & 구현 담당
-- 발견된 문제를 키보드 코드 수정으로 차단
-- 결과물: 패치된 AnySoftKeyboard + 강화 기능
+- A가 발견한 핵심 경계 조건을 코드 수정으로 보완
+- 클립보드 마스킹 조건 강화
+- 필요 시 `NO_SUGGESTIONS` 정책 개선 검토
+- 관련 단위 테스트 작성
+- 결과물: 패치된 AnySoftKeyboard + 테스트
+
 ### 역할 분담의 장점
-- 졸프 스토리가 자연스러움 (문제 발견 → 해결)
-- 서로 다른 전문 영역 형성 → 발표 시 Q&A 분담 가능
-- 한쪽이 막혀도 다른 쪽 진행 가능
-- 마지막에 A의 PoC로 B의 패치를 검증 → 자연스러운 평가 파트 도출
+- 분석 → 재현 → 패치 → 재검증 흐름이 명확함
+- A의 PoC로 B의 패치 효과를 바로 검증 가능
+- 발표 시 분석 파트와 구현 파트의 책임 범위가 분명함
+
 ---
- 
+
 ## 3. 주차별 일정
- 
+
 ### Phase 1: 공동 학습
- 
-둘 다 함께 진행:
+
 - AnySoftKeyboard 빌드 및 실행 환경 세팅
-- 코드베이스 전체 구조 파악
-- 안드로이드 IME 동작 원리 학습 (`InputMethodService`, `EditorInfo`, `InputType`)
-- 자동 추천 관련 핵심 파일 위치 공동 파악
-### Phase 2: 본격 분담
- 
-#### A 담당 (분석/공격)
- 
+- Android IME 구조 학습
+- `InputMethodService`, `EditorInfo`, `InputType`, `imeOptions` 이해
+- 추천 strip, 클립보드 strip, 인코그니토/학습 차단 관련 코드 위치 파악
+
+### Phase 2: 분석 및 PoC
+
+#### A 담당
+
 | 단계 | 작업 |
 |---|---|
-| 1 | InputType 플래그 종류별 케이스 정리, 각 케이스 코드 동작 추적 |
-| 2 | 테스트용 Android 앱 제작 (다양한 InputType의 EditText 모음) |
-| 3 | 실험: 각 필드 입력 → 학습/추천 발생 여부 측정, 표로 정리 |
-| 4 | 추가 시나리오: 연락처 기반 추천 누출, 클립보드 추천 등 |
-| 5 | 취약점 보고서 작성 + PoC 데모 영상 |
- 
-#### B 담당 (방어/구현)
- 
+| 1 | `onStartInput`, `onStartInputView` 흐름 분석 |
+| 2 | `InputType`/`imeOptions` 조합별 테스트 케이스 정리 |
+| 3 | PoC Android 앱 제작 |
+| 4 | 원본 AnySoftKeyboard에서 추천 strip/클립보드 strip 동작 측정 |
+| 5 | 발견 사항 보고서화 및 B에게 패치 요구사항 전달 |
+
+#### B 담당
+
 | 단계 | 작업 |
 |---|---|
-| 1 | 추천/학습 핵심 코드 분석 (`AnySoftKeyboard.java`, 사전 관련 클래스) |
-| 2 | InputType 검사 로직 강화 — 누락 케이스 차단 |
-| 3 | 휴리스틱 탐지 추가 — hint/label 키워드 검사 ("password", "비밀번호" 등) |
-| 4 | 학습된 사전에서 민감 패턴 자동 제거 (긴 영숫자 혼합, 카드번호 형식 등) |
-| 5 | 사용자 알림 UI — "이 필드는 민감 정보로 판단되어 학습하지 않습니다" |
- 
-### Phase 3: 통합 & 마무리
- 
-1) **(공동 - 가장 중요)**
-- A의 PoC 앱으로 B의 패치 검증
-- A: 발견 케이스 중 패치 후 차단된 비율 측정
-- B: 새로 발견된 케이스 추가 패치
-- 졸프 발표의 핵심 데이터 도출 구간
-2) 
-- A: 최종 보고서 작성 (분석 + 평가 결과)
-- B: 최종 보고서 작성 (구현 + 기여 포인트)
-- 데모 영상 공동 제작
-3) 
-- 발표 자료 제작, 리허설, 예상 질문 정리
+| 1 | A가 전달한 F2 클립보드 마스킹 이슈 분석 |
+| 2 | 숫자 비밀번호/PIN 필드에서도 클립보드가 마스킹되도록 수정 |
+| 3 | 관련 단위 테스트 작성 |
+| 4 | 필요 시 F1 `NO_SUGGESTIONS` 정책 개선 검토 |
+| 5 | 패치 APK 제공 |
+
+### Phase 3: 통합 및 평가
+
+- A의 PoC 앱으로 B 패치 버전 재검증
+- 원본/패치 버전 결과표 작성
+- 추천 차단률, 클립보드 마스킹률, 회귀 여부 비교
+- 최종 보고서 및 발표 자료 작성
+- 데모 영상 제작
+
 ---
- 
-## 4. 분석 시작 포인트 (참고)
- 
-### 핵심 파일
-```
+
+## 4. 현재 핵심 발견 사항
+
+| ID | 내용 | 현재 판단 |
+|---|---|---|
+| F1 | `NO_SUGGESTIONS`가 `AUTO_CORRECT`/`AUTO_COMPLETE`와 함께 있을 때 추천 strip 표시 | 정책 충돌, 선택 개선 |
+| F2 | 숫자 비밀번호/PIN 필드에서 클립보드 strip 마스킹 조건 누락 | 핵심 패치 대상 |
+| F3 | 웹/이메일 필드에서 추천 strip 유지 | 관찰 결과 |
+| F4 | `IME_FLAG_NO_PERSONALIZED_LEARNING`은 학습 차단이 중심이고 추천 strip은 유지 | 관찰 결과 |
+| F5 | `hint="비밀번호"`만 있는 일반 텍스트 필드는 민감 필드로 판단되지 않음 | 향후 개선점 |
+| F6 | `TYPE_NULL` 필드는 이번 PoC에서 추천 strip 미재현 | 낮은 우선순위 |
+
+---
+
+## 5. 핵심 파일
+
+```text
 ime/app/src/main/java/com/anysoftkeyboard/
-├── AnySoftKeyboard.java           ← onStartInput / onStartInputView
-├── dictionaries/                  ← 사전 및 학습 로직
-└── keyboards/views/CandidateView* ← 추천 후보 UI
-```
- 
-### 주요 InputType 플래그
-- `TYPE_TEXT_VARIATION_PASSWORD`
-- `TYPE_TEXT_VARIATION_VISIBLE_PASSWORD`
-- `TYPE_TEXT_VARIATION_WEB_PASSWORD`
-- `TYPE_NUMBER_VARIATION_PASSWORD`
-- `TYPE_TEXT_FLAG_NO_SUGGESTIONS`
-- `TYPE_CLASS_NUMBER` + 신용카드 패턴 등
----
- 
-## 5. 협업 운영
- 
-### Git 운영
-- 각자 fork에서 작업
-- A: `analysis` 브랜치 (PoC 앱 + 문서)
-- B: `feature/security-enhancement` 브랜치 (키보드 패치)
-- 8주차 통합 시점에 merge
-### 주간 동기화
-- 매주 1회 30분 진행 상황 공유 미팅
-- A가 발견한 케이스 → B에게 즉시 공유 (B가 막아야 하므로)
+├── ime/
+│   ├── AnySoftKeyboardClipboard.java      ← F2 클립보드 마스킹
+│   ├── AnySoftKeyboardIncognito.java      ← 비밀번호/PIN 학습 차단
+│   ├── AnySoftKeyboardSuggestions.java    ← 추천 활성 여부
+│   └── AnySoftKeyboardPressEffects.java   ← 비밀번호/PIN 키 미리보기 차단
+└── utils/
+    └── IMEUtil.java                       ← F1 NO_SUGGESTIONS 정책
+PoC 앱:
 
- 
----
- 
-## 6. 발표 시 역할 분담
- 
-| 파트 | 담당 |
-|---|---|
-| 도입 / 주제 동기 | A |
-| 분석 방법론 / 결과 | A |
-| 구현 내용 | B |
-| 평가 결과 | A (자기 PoC로 검증) |
-| Q&A | 영역별로 분담 |
- 
----
+poc-app/
+분석 문서:
 
- 
-## 7. 현재 진행 상황
- 
-- [x] AnySoftKeyboard 빌드 환경 세팅 (macOS, Android Studio)
-- [x] 에뮬레이터 실행 및 IME 활성화 완료
-- [x] 권한 설정 완료 (Contacts 기반 추천 허용)
-- [x] Auto suggestion aggression: Maximum
-- [ ] 코드베이스 구조 파악
-- [ ] InputType 처리 코드 추적 시작
- 
+docs/analysis/졸프_분석_보고서.md
+docs/analysis/B에게_전달할_보안_패치_요구사항.md
+6. Git 운영
+A: analysis 브랜치
+PoC 앱
+분석 보고서
+실험 결과
+B: feature/security-enhancement 브랜치
+AnySoftKeyboard 보안 패치
+테스트 코드
+통합 시 A의 PoC로 B의 패치 검증
+7. 발표 역할
+파트	담당
+도입 / 문제 정의	A
+AnySoftKeyboard 보호 정책 분석	A
+PoC 앱 및 원본 결과	A
+보안 패치 구현	B
+패치 전/후 비교 평가	A
+Q&A	영역별 분담
+8. 현재 진행 상황
+AnySoftKeyboard 빌드 환경 세팅
+에뮬레이터 실행 및 IME 활성화
+onStartInput / onStartInputView 흐름 분석
+PoC 앱 제작
+F1~F6 테스트 필드 구성
+F2 클립보드 마스킹 이슈 재현
+B 담당 패치 요구사항 문서 작성
+B 패치 구현
+패치 버전 재검증
+최종 평가표 작성
