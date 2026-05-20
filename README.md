@@ -117,11 +117,11 @@ ime/app/src/main/java/com/anysoftkeyboard/
 │   └── AnySoftKeyboardPressEffects.java   ← 비밀번호/PIN 키 미리보기 차단
 └── utils/
     └── IMEUtil.java                       ← F1 NO_SUGGESTIONS 정책
+
 PoC 앱:
-
 poc-app/
-분석 문서:
 
+분석 문서:
 docs/analysis/졸프_분석_보고서.md
 docs/analysis/B에게_전달할_보안_패치_요구사항.md
 ```
