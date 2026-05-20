@@ -39,8 +39,9 @@ Do not insert test strings with `adb`, app-side autofill, or programmatic text f
 | T1 normal text | Suggestions shown |
 | T4 `NO_SUGGESTIONS` | Suggestions not shown |
 | T5 `NO_SUGGESTIONS | AUTO_CORRECT` | Suggestions shown |
+| T6 `NO_SUGGESTIONS | AUTO_COMPLETE` | Suggestions shown |
 
-This confirms that `NO_SUGGESTIONS` works alone but is ignored when `AUTO_CORRECT` is also set.
+This confirms that `NO_SUGGESTIONS` works alone but is ignored when `AUTO_CORRECT` or `AUTO_COMPLETE` is also set. This result proves suggestion-strip behavior only; personal dictionary learning requires a separate manual typing test.
 
 ### F2: Number password clipboard masking
 
@@ -55,6 +56,18 @@ If the clipboard value is copied while T2 text password is focused, AnySoftKeybo
 | T3 number password/PIN | Keyboard clipboard strip shows the latest `clipcasepin...` value |
 
 The app Toast only confirms that the test value was copied. Do not count the Toast as a keyboard clipboard-strip result.
+
+### F3-F6: Additional suggestion-strip checks
+
+These checks use a short `lea` prefix to verify whether the candidate strip remains active. They do not prove whether the typed value is learned into the personal dictionary.
+
+| Field | Result |
+|---|---|
+| T7 `WEB_EDIT_TEXT` | Suggestions shown |
+| T8 `EMAIL_ADDRESS` | Suggestions shown |
+| T9 `NO_PERSONALIZED_LEARNING` | Suggestions shown |
+| T10 normal text with `hint="비밀번호"` | Suggestions shown |
+| T11 `TYPE_NULL` | Keyboard shown, but candidate suggestions not shown |
 
 Build with:
 
